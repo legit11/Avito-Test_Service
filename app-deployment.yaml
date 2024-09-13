@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avito-app
+  template:
+    metadata:
+      labels:
+        app: avito-app
+    spec:
+      containers:
+      - name: avito-app
+        image: dock1155/avito-app
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: app-config

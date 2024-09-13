@@ -1,0 +1,12 @@
+# app-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  SERVER_ADDRESS: "localhost:8080"
+  POSTGRES_USERNAME: "postgres"
+  POSTGRES_PASSWORD: "133769"
+  POSTGRES_HOST: "postgres"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DATABASE: "postgres"
