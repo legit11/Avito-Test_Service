@@ -1,4 +1,3 @@
-# postgres-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,11 +15,13 @@ spec:
       containers:
       - name: postgres
         image: postgres:16.3
+        ports:
+        - containerPort: 5432
         envFrom:
         - configMapRef:
             name: postgres-config
-        ports:
-        - containerPort: 5432
+        - secretRef:
+            name: postgres-secret
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
