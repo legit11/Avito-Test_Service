@@ -1,7 +1,8 @@
 variables:
   CALLBACK_URL: "https://codenrock.com/api/gitlab/check"
-  CONTEXT:  avito-testirovanie-na-backend-1270/ci-build-6105:yc
-  DOMAIN: avito2024.codenrock.com
+  CONTEXT: "avito-testirovanie-na-backend-1270/ci-build-6105:yc"
+  DOMAIN: "avito2024.codenrock.com"
+  KUBE_NAMESPACE: "cnrprod1725725859-team-76875"  # Пример namespace
 
 stages:
   - build
@@ -14,19 +15,19 @@ build:
     - docker:27.0.3-dind
   before_script:
     - mkdir -pv ${HOME}/.docker
-    - cp -vf  $YCR_DOCKER_CONFIG_JSON ${HOME}/.docker/config.json
+    - cp -vf $YCR_DOCKER_CONFIG_JSON ${HOME}/.docker/config.json
     - chmod 0600 ${HOME}/.docker/config.json
     - sleep 20
     - docker info
   variables:
-     DOCKER_HOST: tcp://docker:2375
-     DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   only:
     - main
     - master
   script:
     - docker build . -f ./Dockerfile -t ${CI_REGISTRY_IMAGE}:$CI_COMMIT_SHA
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
     - docker push ${CI_REGISTRY_IMAGE}:$CI_COMMIT_SHA
   tags:
     - runner
@@ -36,31 +37,29 @@ build:
 deploy:
   environment:
     name: production
-    url: https://$KUBE_NAMESPACE-$CI_PROJECT_NAMESPACE_ID.$DOMAIN
+    url: https://$KUBE_NAMESPACE.$DOMAIN
   image:
     name: bitnami/kubectl:latest
-    entrypoint: ['']
+    entrypoint: [""]
   stage: deploy
   only:
     - main
     - master
   script:
-    - export KUBE_NAMESPACE=$(echo $CI_PROJECT_DIR|sed 's/.*\/\(.*\)\/.*/\1/')
-    - export HOST_NAME=$KUBE_NAMESPACE-$CI_PROJECT_NAMESPACE_ID.$DOMAIN
-    - if [ "$KUBE_NAMESPACE" == "" ]; then echo "Namespace is not configured"; exit 1; fi
+    - export HOST_NAME=$KUBE_NAMESPACE.$DOMAIN
     - echo "URL https://$HOST_NAME"
     - kubectl config get-contexts
     - kubectl config use-context $CONTEXT
     - kubectl create ns $KUBE_NAMESPACE || true
-    - kubectl -n default get secret avito2024-tls -o yaml|sed 's/  namespace:.*//g'|sed 's/  uid:.*//g'|sed 's/  resourceVersion:.*//g'|sed 's/  creationTimestamp:.*//g' | kubectl apply --namespace $KUBE_NAMESPACE -f -
-    - kubectl -n default get secret regcred -o yaml|sed 's/  namespace:.*//g'|sed 's/  uid:.*//g'|sed 's/  resourceVersion:.*//g'|sed 's/  creationTimestamp:.*//g' | kubectl apply --namespace $KUBE_NAMESPACE -f -
+    - kubectl -n default get secret avito2024-tls -o yaml | sed 's/  namespace:.*//g' | sed 's/  uid:.*//g' | sed 's/  resourceVersion:.*//g' | sed 's/  creationTimestamp:.*//g' | kubectl apply --namespace $KUBE_NAMESPACE -f -
+    - kubectl -n default get secret regcred -o yaml | sed 's/  namespace:.*//g' | sed 's/  uid:.*//g' | sed 's/  resourceVersion:.*//g' | sed 's/  creationTimestamp:.*//g' | kubectl apply --namespace $KUBE_NAMESPACE -f -
     - |
       cat <<EOF | kubectl -n $KUBE_NAMESPACE apply -f -
       ---
       apiVersion: apps/v1
       kind: Deployment
       metadata:
-        name: $KUBE_NAMESPACE-backend
+        name: avito-app-deployment
         annotations:
           app.gitlab.com/app: $CI_PROJECT_PATH_SLUG
           app.gitlab.com/env: $CI_ENVIRONMENT_SLUG
@@ -68,11 +67,11 @@ deploy:
         replicas: 1
         selector:
           matchLabels:
-            app: $KUBE_NAMESPACE-backend
+            app: avito-app
         template:
           metadata:
             labels:
-              app: $KUBE_NAMESPACE-backend
+              app: avito-app
             annotations:
               app.gitlab.com/app: $CI_PROJECT_PATH_SLUG
               app.gitlab.com/env: $CI_ENVIRONMENT_SLUG
@@ -80,30 +79,18 @@ deploy:
             imagePullSecrets:
               - name: regcred
             containers:
-              - name: $KUBE_NAMESPACE
+              - name: avito-app
                 image: ${CI_REGISTRY_IMAGE}:$CI_COMMIT_SHA
                 imagePullPolicy: Always
                 resources:
                   requests:
                     cpu: "100m"
-                    memory: "256M"
-                env:
-                - name: POSTGRES_CONN
-                  value: "postgres://$KUBE_NAMESPACE:$KUBE_NAMESPACE@rc1b-5xmqy6bq501kls4m.mdb.yandexcloud.net:6432/$KUBE_NAMESPACE"
-                - name: POSTGRES_JDBC_URL
-                  value: "jdbc:postgresql://rc1b-5xmqy6bq501kls4m.mdb.yandexcloud.net:6432/$KUBE_NAMESPACE"
-                - name: POSTGRES_USERNAME
-                  value: "$KUBE_NAMESPACE"
-                - name: POSTGRES_PASSWORD
-                  value: "$KUBE_NAMESPACE"
-                - name: POSTGRES_HOST
-                  value: "rc1b-5xmqy6bq501kls4m.mdb.yandexcloud.net"
-                - name: POSTGRES_PORT
-                  value: "6432"
-                - name: POSTGRES_DATABASE
-                  value: "$KUBE_NAMESPACE"
-                - name: SERVER_ADDRESS
-                  value: "0.0.0.0:8080"
+                    memory: "256Mi"
+                envFrom:
+                - configMapRef:
+                    name: app-config
+                - secretRef:
+                    name: postgres-secret
                 ports:
                   - containerPort: 8080
                     protocol: TCP
@@ -111,22 +98,22 @@ deploy:
       apiVersion: v1
       kind: Service
       metadata:
-        name: ${KUBE_NAMESPACE}-backend
+        name: avito-app-service
       spec:
         selector:
-          app: ${KUBE_NAMESPACE}-backend
+          app: avito-app
         ports:
           - protocol: TCP
-            port: 8080
+            port: 80
             targetPort: 8080
+        type: LoadBalancer
       ---
       apiVersion: networking.k8s.io/v1
       kind: Ingress
       metadata:
-        name: $KUBE_NAMESPACE-backend
+        name: avito-app-ingress
         annotations:
           kubernetes.io/ingress.class: nginx
-          #cert-manager.io/cluster-issuer: "letsencrypt"
           nginx.ingress.kubernetes.io/ssl-redirect: "false"
           nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
       spec:
@@ -142,9 +129,9 @@ deploy:
               pathType: ImplementationSpecific
               backend:
                 service:
-                  name: $KUBE_NAMESPACE-backend
+                  name: avito-app-service
                   port:
-                    number: 8080
+                    number: 80
       ---
       EOF
   tags:

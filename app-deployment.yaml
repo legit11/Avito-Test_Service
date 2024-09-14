@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-deployment
+  name: avito-app-deployment
 spec:
   replicas: 1
   selector:
@@ -14,9 +14,18 @@ spec:
     spec:
       containers:
       - name: avito-app
-        image: dock1155/avito-app
+        image: dock1155/avito-app:latest
         ports:
         - containerPort: 8080
         envFrom:
         - configMapRef:
             name: app-config
+        - secretRef:
+            name: postgres-secret
+        volumeMounts:
+        - name: config-volume
+          mountPath: /avito/config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: app-config
