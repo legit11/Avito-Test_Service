@@ -55,6 +55,11 @@ docker-compose up --build
    docker cp ./test_data.sql db_app:/test_data.sql
 ```
 
+
+```sh
+docker exec -it db_app psql -U postgres -d postgres -f /test.sql
+```
+
 ## Осуществите проверку данных:
 
 1. Проверьте наличие данных в таблице Employee:
