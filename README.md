@@ -48,3 +48,36 @@ docker-compose up --build
 
 ```sh
    docker cp ./test_data.sql db_app:/test_data.sql
+```
+
+## Осуществвите проверку данных:
+
+1. Проверьте наличие данных в таблице Employee:
+   
+
+ ```sh
+   docker exec -it db_app psql -U postgres -d postgres -c "SELECT * FROM employee;"
+```
+
+
+2. Проверьте наличие данных в таблице Organization:
+
+   
+  ```sh
+   docker exec -it db_app psql -U postgres -d postgres -c "SELECT * FROM organization;"
+```
+
+
+3. Проверьте наличие данных в таблице Responsible_Organizations:
+
+   
+   ```sh
+   docker exec -it db_app psql -U postgres -d postgres -c "SELECT * FROM organization_responsible;"
+   ```
+
+
+5. Проверьте налчие данных в таблице Tenders:
+
+
+ ```sh
+   docker exec -it db_app psql -U postgres -d postgres -c "SELECT * FROM tenders;"
