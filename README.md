@@ -12,10 +12,11 @@ docker-compose up --build
 
 Если вы работаете на Windows, возможно, у вас возникнут проблемы с выполнением скриптов из-за различий в стилях окончания строк между Windows (CRLF) и Linux (LF). Docker требует, чтобы файлы были в LF-формате. Это особенно важно для следующих файлов:
 
-- `docker/start.sh`
-- `docker/wait-for-it.sh`
-- `docker-compose.yml`
+
 - `Dockerfile`
+- `docker/start.sh`
+- `docker-compose.yml`
+
 
 Убедитесь, что указанные файлы имеют стиль строк LF. Вы можете конвертировать файлы из CRLF в LF с помощью любой текстовой редакции, например:
 #### Pycharm:
