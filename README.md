@@ -48,5 +48,3 @@ docker-compose up --build
 
 ```sh
    docker cp ./test_data.sql db_app:/test_data.sql
-
-
