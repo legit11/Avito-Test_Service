@@ -86,3 +86,9 @@ docker-compose up --build
 
  ```sh
    docker exec -it db_app psql -U postgres -d postgres -c "SELECT * FROM tenders;"
+```
+
+После этого проект  будет полностью готов к тестированию функциональности.
+
+
+Большое спасибо!
