@@ -585,7 +585,7 @@ async def edit_bid_status(
 )
 async def send_feedback(
         bid_id: uuid.UUID,
-        bid_feedback: str = Query("возьмите на стажировку", max_length=1000, description="Фидбэк"),
+        bid_feedback: str = Query("Хочу на стажировку в Avito!", max_length=1000, description="Фидбэк"),
         username: str = Query("test_user", max_length=50, description="Ваше имя пользователя"),
         session: AsyncSession = Depends(get_async_session),
 ):

@@ -30,16 +30,16 @@ class FeedBackResponse(BaseModel):
     class Config:
         from_attributes = True
 class BidCreate(BaseModel):
-    name: str = Field(..., example="Доставка товаров Алексей")
-    description: str = Field(..., example="Доставлю любой товар за 100 рублей")
+    name: str = Field(..., example="Доставка товаров")
+    description: str = Field(..., example="Курьерская доставка")
     tender_id: UUID = Field(..., example="550e8400-e29b-41d4-a716-446655440000")
     author_type: AuthorType = Field(..., example="Organization")
     author_id: UUID = Field(..., example="550e8400-e29b-41d4-a716-446655440000")
 
 class BidResponse(BaseModel):
     id: UUID = Field(..., example="550e8400-e29b-41d4-a716-446655440000")
-    name: str = Field(..., example="Доставка товаров Алексей")
-    description: str = Field(..., example="Доставлю любой товар за 100 рублей")
+    name: str = Field(..., example="Доставка товаров")
+    description: str = Field(..., example="Курьерская доставка")
     status: BidStatus = Field(..., example="Created")
     tender_id: UUID = Field(..., example="550e8400-e29b-41d4-a716-446655440000")
     author_type: AuthorType = Field(..., example="Organization")
