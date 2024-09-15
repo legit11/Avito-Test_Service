@@ -16,7 +16,7 @@ services:
       context: .
     env_file:
       - .env
-    container_name: avito_app
+    container_name: avito_app_test
     command: ["sh", "/avito/docker/start.sh"]
     ports:
       - 8080:8080
