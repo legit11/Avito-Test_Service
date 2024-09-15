@@ -79,9 +79,9 @@ docker-compose up --build
 3. Проверьте наличие данных в таблице Responsible_Organizations:
 
    
-   ```sh
-   docker exec -it db_app psql -U postgres -d postgres -c "SELECT * FROM organization_responsible;"
-   ```
+```sh
+docker exec -it db_app psql -U postgres -d postgres -c "SELECT * FROM organization_responsible;"
+```
 
 
 5. Проверьте наличие данных в таблице Tenders:
