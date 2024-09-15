@@ -55,7 +55,7 @@ docker-compose up --build
    docker cp ./test_data.sql db_app:/test_data.sql
 ```
 
-## Осуществвите проверку данных:
+## Осуществите проверку данных:
 
 1. Проверьте наличие данных в таблице Employee:
    
