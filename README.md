@@ -57,7 +57,7 @@ docker-compose up --build
 
 
 ```sh
-docker exec -it db_app psql -U postgres -d postgres -f /test.sql
+   docker exec -it db_app psql -U postgres -d postgres -f /test.sql
 ```
 
 ## Осуществите проверку данных:
